@@ -1,9 +1,10 @@
 import pygame
 import math
 
+
 pygame.init()
 
-WIDTH, HEIGHT = 1920, 1080
+WIDTH, HEIGHT = 1080, 800
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AstraLab")
 
@@ -12,7 +13,6 @@ G = 6.67428e-11
 
 SCALE = 100 / AU  # 100 / AU is 1AU = 100 pixels. Adjust the scale if needed
 TIMESTEP = 3600 * 24  # 3600 * 24 = 1 day per frame. Adjust the timestep to slow down the simulation
-=======
 SCALE = 100 / AU  # 100 pixels per AU. Adjust the scale if needed
 TIMESTEP = 3600 * 24  # One day per frame. Adjust the timestep to slow down the simulation
 
@@ -45,15 +45,15 @@ class Planet:
         self.x_velocity = 0
         self.y_velocity = 0
 
-    def draw(self, win):
+    def draw(self, win, ofx,ofy):
         x = self.x * SCALE + WIDTH / 2
         y = self.y * SCALE + HEIGHT / 2
 
         if len(self.orbit) > 2:
-            updated_points = [(point[0] * SCALE + WIDTH / 2, point[1] * SCALE + HEIGHT / 2) for point in self.orbit]
+            updated_points = [(point[0] * SCALE + WIDTH / 2+ofx, point[1] * SCALE + HEIGHT / 2+ofy) for point in self.orbit]
             pygame.draw.lines(win, DARK_GREY, False, updated_points, 1)
 
-        pygame.draw.circle(win, self.color, (int(x), int(y)), self.radius)
+        pygame.draw.circle(win, self.color, (int(x) + ofx, int(y)+ofy), self.radius)
 
     def attraction(self, other):
         other_x, other_y = other.x, other.y
@@ -125,10 +125,16 @@ def main():
     planets = [sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
 
     days_passed = 0
+    ofx, ofy = 0, 0
+    currx, curry = pygame.mouse.get_pos()
 
     while running:
         clock.tick(60)
         WIN.fill((0, 0, 0))
+
+        for planet in planets:
+            planet.update_position(planets)
+            planet.draw(WIN, ofx,ofy)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -139,13 +145,19 @@ def main():
                 if event.button == 4:
                     SCALE *= (1 + zoom_factor)
                 # Zoom out
-                elif event.button == 5:
+                if event.button == 5:
                     SCALE /= (1 + zoom_factor)
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    currx = pygame.mouse.get_pos()[0] - ofx
+                    curry = pygame.mouse.get_pos()[1] - ofy
+            if event.type == pygame.MOUSEMOTION:
+                if pygame.mouse.get_pressed()[0]:
+                    ofx = pygame.mouse.get_pos()[0]- currx
+                    ofy = pygame.mouse.get_pos()[1] - curry
 
 
-        for planet in planets:
-            planet.update_position(planets)
-            planet.draw(WIN)
+
+
 
         days_passed += TIMESTEP / (3600 * 24)
         days_text = font.render(f"Days passed: {int(days_passed)} Days", True, (255, 255, 255))
