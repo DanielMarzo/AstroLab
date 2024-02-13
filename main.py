@@ -13,8 +13,7 @@ G = 6.67428e-11
 
 SCALE = 100 / AU  # 100 / AU is 1AU = 100 pixels. Adjust the scale if needed
 TIMESTEP = 3600 * 24  # 3600 * 24 = 1 day per frame. Adjust the timestep to slow down the simulation
-SCALE = 100 / AU  # 100 pixels per AU. Adjust the scale if needed
-TIMESTEP = 3600 * 24  # One day per frame. Adjust the timestep to slow down the simulation
+
 
 
 Yellow = (255, 255, 0)
@@ -53,7 +52,7 @@ class Planet:
             updated_points = [(point[0] * SCALE + WIDTH / 2+ofx, point[1] * SCALE + HEIGHT / 2+ofy) for point in self.orbit]
             pygame.draw.lines(win, DARK_GREY, False, updated_points, 1)
 
-        pygame.draw.circle(win, self.color, (int(x) + ofx, int(y)+ofy), self.radius)
+        pygame.draw.circle(win, self.color, (int(x) + ofx, int(y)+ofy), self.radius*SCALE*AU/200)
 
     def attraction(self, other):
         other_x, other_y = other.x, other.y
