@@ -9,8 +9,13 @@ pygame.display.set_caption("AstraLab")
 
 AU = 149.6e6 * 1000
 G = 6.67428e-11
+
 SCALE = 100 / AU  # 100 / AU is 1AU = 100 pixels. Adjust the scale if needed
 TIMESTEP = 3600 * 24  # 3600 * 24 = 1 day per frame. Adjust the timestep to slow down the simulation
+=======
+SCALE = 100 / AU  # 100 pixels per AU. Adjust the scale if needed
+TIMESTEP = 3600 * 24  # One day per frame. Adjust the timestep to slow down the simulation
+
 
 Yellow = (255, 255, 0)
 Blue = (100, 149, 237)
@@ -20,6 +25,9 @@ WHITE = (255, 255, 255)
 
 pygame.font.init()
 font = pygame.font.SysFont("comicsans", 30)
+
+# New variables for zoom control
+zoom_factor = 0.05  # How much each scroll zooms in or out
 
 
 class Planet:
@@ -81,8 +89,11 @@ class Planet:
 
 
 def main():
+    global SCALE  # Make SCALE modifiable globally
     running = True
     clock = pygame.time.Clock()
+
+    # Planet definitions remain the same
 
     sun = Planet(0, 0, 30, Yellow, 1.98892 * 10 ** 30)  # Sun
     sun.sun = True
@@ -123,6 +134,15 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                # Zoom in
+                if event.button == 4:
+                    SCALE *= (1 + zoom_factor)
+                # Zoom out
+                elif event.button == 5:
+                    SCALE /= (1 + zoom_factor)
+
+
         for planet in planets:
             planet.update_position(planets)
             planet.draw(WIN)
@@ -134,6 +154,5 @@ def main():
         pygame.display.update()
 
     pygame.quit()
-
 
 main()
