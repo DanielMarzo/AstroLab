@@ -1,21 +1,17 @@
 import pygame
 import math
 
-
 pygame.init()
 
 WIDTH, HEIGHT = 1080, 800
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("AstraLab")
+pygame.display.set_caption("AstroLab")
 
 AU = 149.6e6 * 1000
 G = 6.67428e-11
 
 SCALE = 100 / AU  # 100 / AU is 1AU = 100 pixels. Adjust the scale if needed
 TIMESTEP = 3600 * 24  # 3600 * 24 = 1 day per frame. Adjust the timestep to slow down the simulation
-SCALE = 100 / AU  # 100 pixels per AU. Adjust the scale if needed
-TIMESTEP = 3600 * 24  # One day per frame. Adjust the timestep to slow down the simulation
-
 
 Yellow = (255, 255, 0)
 Blue = (100, 149, 237)
@@ -114,13 +110,13 @@ def main():
     jupiter.y_velocity = 13.06 * 1000
 
     saturn = Planet(9.582 * AU, 0, 30, (204, 204, 102), 5.683 * 10 ** 26)
-    saturn.y_velocity = 9.68 * 1000
+    saturn.y_velocity = -9.68 * 1000
 
     uranus = Planet(19.218 * AU, 0, 32, (173, 216, 230), 8.681 * 10 ** 25)
-    uranus.y_velocity = 6.80 * 1000
+    uranus.y_velocity = -6.80 * 1000
 
     neptune = Planet(30.110 * AU, 0, 34, (65, 105, 225), 1.024 * 10 ** 26)
-    neptune.y_velocity = 5.43 * 1000
+    neptune.y_velocity = -5.43 * 1000
 
     planets = [sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
 
@@ -154,9 +150,6 @@ def main():
                 if pygame.mouse.get_pressed()[0]:
                     ofx = pygame.mouse.get_pos()[0]- currx
                     ofy = pygame.mouse.get_pos()[1] - curry
-
-
-
 
 
         days_passed += TIMESTEP / (3600 * 24)
