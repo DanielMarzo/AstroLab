@@ -1,19 +1,21 @@
 import pygame
 import math
+import rocket
+from config import Config
 
 pygame.init()
 
-WIDTH, HEIGHT = 1080, 800
+WIDTH, HEIGHT = Config.WIDTH, Config.HEIGHT
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AstroLab")
 
 # constant
 AU = 149.6e6 * 1000
-G = 6.67428e-11
+Config.G = 6.67428e-11
 
 # variables
-SCALE = 100 / AU  # 100 / AU is 1AU = 100 pixels. Adjust the scale if needed
-TIMESTEP = 3600 * 24  # 3600 * 24 = 1 day per frame. Adjust the timestep to slow down the simulation
+# SCALE = 100 / AU  # 100 / AU is 1AU = 100 pixels. Adjust the scale if needed
+# Config.TIMESTEP = 3600 * 24  # 3600 * 24 = 1 day per frame. Adjust the timestep to slow down the simulation
 
 # colors
 c_sun = (255, 255, 0)
@@ -49,19 +51,20 @@ class Planet:
         self.y_velocity = 0
 
     def draw(self, win, ofx, ofy):
-        x = self.x * SCALE + WIDTH / 2
-        y = self.y * SCALE + HEIGHT / 2
+        x = self.x * Config.get_scale() + Config.WIDTH / 2
+        y = self.y * Config.get_scale() + HEIGHT / 2
 
         if len(self.orbit) > 100:
             self.orbit.pop(0)
             self.orbit.pop(0)
 
         if len(self.orbit) > 2:
-            updated_points = [(point[0] * SCALE + WIDTH / 2 + ofx, point[1] * SCALE + HEIGHT / 2 + ofy) for point in
+            updated_points = [(point[0] * Config.get_scale() + Config.WIDTH / 2 + ofx,
+                               point[1] * Config.get_scale() + Config.HEIGHT / 2 + ofy) for point in
                               self.orbit]
             pygame.draw.lines(win, (201, 201, 201), False, updated_points, 1)
 
-        pygame.draw.circle(win, self.color, (int(x) + ofx, int(y) + ofy), self.radius * SCALE * AU / 200)
+        pygame.draw.circle(win, self.color, (int(x) + ofx, int(y) + ofy), self.radius * Config.get_scale() * AU / 200)
 
     def attraction(self, other):
         other_x, other_y = other.x, other.y
@@ -72,7 +75,8 @@ class Planet:
         if other.sun:
             self.distance_to_sun = distance
 
-        force = G * self.mass * other.mass / distance ** 2
+        force = Config.G * self.mass * other.mass / distance ** 2
+
         theta = math.atan2(distance_y, distance_x)  # theta is the angle
         force_x = math.cos(theta) * force
         force_y = math.sin(theta) * force
@@ -89,11 +93,11 @@ class Planet:
                 total_fx += fx
                 total_fy += fy
 
-            self.x_velocity += total_fx / self.mass * TIMESTEP
-            self.y_velocity += total_fy / self.mass * TIMESTEP
+            self.x_velocity += total_fx / self.mass * Config.get_timestep()
+            self.y_velocity += total_fy / self.mass * Config.get_timestep()
 
-            self.x += self.x_velocity * TIMESTEP
-            self.y += self.y_velocity * TIMESTEP
+            self.x += self.x_velocity * Config.get_timestep()
+            self.y += self.y_velocity * Config.get_timestep()
             self.orbit.append((self.x, self.y))
 
 
@@ -107,7 +111,7 @@ class Moon(Planet):
         self.radians_per_day = (2 * math.pi) / self.days_per_orbit
 
     def update_position(self, _):
-        self.angle += self.radians_per_day * (TIMESTEP / 86400)
+        self.angle += self.radians_per_day * (Config.get_timestep() / 86400)
         self.angle %= 2 * math.pi
         self.x = self.host_planet.x + math.cos(self.angle) * self.distance_from_planet
         self.y = self.host_planet.y + math.sin(self.angle) * self.distance_from_planet
@@ -115,9 +119,10 @@ class Moon(Planet):
 
 
 def main():
-    global SCALE  # Make SCALE modifiable globally
     running = True
     clock = pygame.time.Clock()
+
+    temp_rockets = []
 
     sun = Planet(0, 0, 32, c_sun, 1.98892 * 10 ** 30)  # Sun
     sun.sun = True
@@ -157,6 +162,31 @@ def main():
         clock.tick(60)
         WIN.fill((0, 0, 0))
 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Zoom in
+                if event.button == 4:
+                    Config.set_scale(Config.get_scale() * (1 + Config.get_zoom_factor()))
+                # Zoom out
+                if event.button == 5:
+                    Config.set_scale(Config.get_scale() / (1 + Config.get_zoom_factor()))
+                currx = pygame.mouse.get_pos()[0] - ofx
+                curry = pygame.mouse.get_pos()[1] - ofy
+
+            if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[2]:
+                ofx = pygame.mouse.get_pos()[0] - currx
+                ofy = pygame.mouse.get_pos()[1] - curry
+
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                scale_x = (mouse_x - Config.WIDTH / 2 - ofx) / Config.get_scale()
+                scale_y = (mouse_y - Config.HEIGHT / 2 - ofy) / Config.get_scale()
+                new_rocket = rocket.Rocket.create_rocket(scale_x, scale_y)
+                temp_rockets.append(new_rocket)
+
         for planet in planets:
             planet.update_position(planets)
             planet.draw(WIN, ofx, ofy)
@@ -164,26 +194,11 @@ def main():
         moon.update_position(None)
         moon.draw(WIN, ofx, ofy)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+        for temp_rocket in temp_rockets:
+            temp_rocket.update_position(planets)
+            temp_rocket.draw(WIN, ofx, ofy)
 
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                # Zoom in
-                if event.button == 4:
-                    SCALE *= (1 + zoom_factor)
-                # Zoom out
-                if event.button == 5:
-                    SCALE /= (1 + zoom_factor)
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    currx = pygame.mouse.get_pos()[0] - ofx
-                    curry = pygame.mouse.get_pos()[1] - ofy
-            if event.type == pygame.MOUSEMOTION:
-                if pygame.mouse.get_pressed()[0]:
-                    ofx = pygame.mouse.get_pos()[0] - currx
-                    ofy = pygame.mouse.get_pos()[1] - curry
-
-        days_passed += TIMESTEP / (3600 * 24)
+        days_passed += Config.get_timestep() / (3600 * 24)
         days_text = font.render(f"Days passed: {int(days_passed)} Days", True, (255, 255, 255))
         WIN.blit(days_text, (10, 10))
 
