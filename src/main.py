@@ -2,6 +2,8 @@ import pygame
 import math
 import rocket
 from config import Config
+from planet import Planet
+from moon import Moon
 
 pygame.init()
 
@@ -10,8 +12,8 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AstroLab")
 
 # constant
-AU = 149.6e6 * 1000
 Config.G = 6.67428e-11
+AU = 149.6e6 * 1000
 
 # variables
 # SCALE = 100 / AU  # 100 / AU is 1AU = 100 pixels. Adjust the scale if needed
@@ -37,85 +39,8 @@ font = pygame.font.SysFont("comicsans", 30)
 zoom_factor = 0.05  # How much each scroll zooms in or out
 
 
-class Planet:
-    def __init__(self, x, y, radius, color, mass):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.color = color
-        self.mass = mass
-        self.orbit = []
-        self.sun = False
-        self.distance_to_sun = 0
-        self.x_velocity = 0
-        self.y_velocity = 0
-
-    def draw(self, win, ofx, ofy):
-        x = self.x * Config.get_scale() + Config.WIDTH / 2
-        y = self.y * Config.get_scale() + HEIGHT / 2
-
-        if len(self.orbit) > 100:
-            self.orbit.pop(0)
-            self.orbit.pop(0)
-
-        if len(self.orbit) > 2:
-            updated_points = [(point[0] * Config.get_scale() + Config.WIDTH / 2 + ofx,
-                               point[1] * Config.get_scale() + Config.HEIGHT / 2 + ofy) for point in
-                              self.orbit]
-            pygame.draw.lines(win, (201, 201, 201), False, updated_points, 1)
-
-        pygame.draw.circle(win, self.color, (int(x) + ofx, int(y) + ofy), self.radius * Config.get_scale() * AU / 200)
-
-    def attraction(self, other):
-        other_x, other_y = other.x, other.y
-        distance_x = other_x - self.x
-        distance_y = other_y - self.y
-        distance = math.sqrt(distance_x ** 2 + distance_y ** 2)
-
-        if other.sun:
-            self.distance_to_sun = distance
-
-        force = Config.G * self.mass * other.mass / distance ** 2
-
-        theta = math.atan2(distance_y, distance_x)  # theta is the angle
-        force_x = math.cos(theta) * force
-        force_y = math.sin(theta) * force
-        return force_x, force_y
-
-    def update_position(self, planets):
-        if not self.sun:
-            total_fx = total_fy = 0
-            for planet in planets:
-                if self == planet:
-                    continue
-
-                fx, fy = self.attraction(planet)
-                total_fx += fx
-                total_fy += fy
-
-            self.x_velocity += total_fx / self.mass * Config.get_timestep()
-            self.y_velocity += total_fy / self.mass * Config.get_timestep()
-
-            self.x += self.x_velocity * Config.get_timestep()
-            self.y += self.y_velocity * Config.get_timestep()
-            self.orbit.append((self.x, self.y))
 
 
-class Moon(Planet):
-    def __init__(self, host_planet, radius, color, mass, distance_from_planet):
-        super().__init__(host_planet.x, host_planet.y, radius, color, mass)
-        self.host_planet = host_planet
-        self.distance_from_planet = distance_from_planet
-        self.angle = 0
-        self.days_per_orbit = 27.3
-        self.radians_per_day = (2 * math.pi) / self.days_per_orbit
-
-    def update_position(self, _):
-        self.angle += self.radians_per_day * (Config.get_timestep() / 86400)
-        self.angle %= 2 * math.pi
-        self.x = self.host_planet.x + math.cos(self.angle) * self.distance_from_planet
-        self.y = self.host_planet.y + math.sin(self.angle) * self.distance_from_planet
-        self.orbit.append((self.x, self.y))
 
 
 def main():

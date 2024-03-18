@@ -20,6 +20,7 @@ class Rocket:
     def create_rocket(x, y):
         return Rocket(x, y)
 
+
     def draw(self, win, ofx, ofy):
         x_screen = self.x * Config.get_scale() + Config.WIDTH / 2 + ofx
         y_screen = self.y * Config.get_scale() + Config.HEIGHT / 2 + ofy
