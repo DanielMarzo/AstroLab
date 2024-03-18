@@ -39,10 +39,6 @@ font = pygame.font.SysFont("comicsans", 30)
 zoom_factor = 0.05  # How much each scroll zooms in or out
 
 
-
-
-
-
 def main():
     running = True
     clock = pygame.time.Clock()
@@ -92,20 +88,19 @@ def main():
                 running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                currx = pygame.mouse.get_pos()[0] - ofx
+                curry = pygame.mouse.get_pos()[1] - ofy
                 # Zoom in
                 if event.button == 4:
                     Config.set_scale(Config.get_scale() * (1 + Config.get_zoom_factor()))
                 # Zoom out
                 if event.button == 5:
                     Config.set_scale(Config.get_scale() / (1 + Config.get_zoom_factor()))
-                currx = pygame.mouse.get_pos()[0] - ofx
-                curry = pygame.mouse.get_pos()[1] - ofy
-
-            if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[2]:
+            if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
                 ofx = pygame.mouse.get_pos()[0] - currx
                 ofy = pygame.mouse.get_pos()[1] - curry
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
                 scale_x = (mouse_x - Config.WIDTH / 2 - ofx) / Config.get_scale()
                 scale_y = (mouse_y - Config.HEIGHT / 2 - ofy) / Config.get_scale()
