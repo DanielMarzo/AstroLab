@@ -93,9 +93,14 @@ def main():
                 # Zoom in
                 if event.button == 4:
                     Config.set_scale(Config.get_scale() * (1 + Config.get_zoom_factor()))
+                    ofx *= (1 + Config.get_zoom_factor())
+                    ofy *= (1 + Config.get_zoom_factor())
+
                 # Zoom out
                 if event.button == 5:
                     Config.set_scale(Config.get_scale() / (1 + Config.get_zoom_factor()))
+                    ofx /= (1 + Config.get_zoom_factor())
+                    ofy /= (1 + Config.get_zoom_factor())
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
                 ofx = pygame.mouse.get_pos()[0] - currx
                 ofy = pygame.mouse.get_pos()[1] - curry
