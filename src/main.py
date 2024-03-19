@@ -78,7 +78,7 @@ def main():
     days_passed = 0
     ofx, ofy = 0, 0
     currx, curry = pygame.mouse.get_pos()
-
+    paused = False
     while running:
         clock.tick(60)
         WIN.fill((0, 0, 0))
@@ -92,15 +92,17 @@ def main():
                 curry = pygame.mouse.get_pos()[1] - ofy
                 # Zoom in
                 if event.button == 4:
-                    Config.set_scale(Config.get_scale() * (1 + Config.get_zoom_factor()))
-                    ofx *= (1 + Config.get_zoom_factor())
-                    ofy *= (1 + Config.get_zoom_factor())
+                    if(Config.get_scale() <= ((100/Config.AU)*10)):
+                        Config.set_scale(Config.get_scale() * (1 + Config.get_zoom_factor()))
+                        ofx *= (1 + Config.get_zoom_factor())
+                        ofy *= (1 + Config.get_zoom_factor())
 
                 # Zoom out
                 if event.button == 5:
-                    Config.set_scale(Config.get_scale() / (1 + Config.get_zoom_factor()))
-                    ofx /= (1 + Config.get_zoom_factor())
-                    ofy /= (1 + Config.get_zoom_factor())
+                    if(Config.get_scale() >= ((100/Config.AU)*.1)):
+                        Config.set_scale(Config.get_scale() / (1 + Config.get_zoom_factor()))
+                        ofx /= (1 + Config.get_zoom_factor())
+                        ofy /= (1 + Config.get_zoom_factor())
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
                 ofx = pygame.mouse.get_pos()[0] - currx
                 ofy = pygame.mouse.get_pos()[1] - curry
@@ -111,6 +113,13 @@ def main():
                 scale_y = (mouse_y - Config.HEIGHT / 2 - ofy) / Config.get_scale()
                 new_rocket = rocket.Rocket.create_rocket(scale_x, scale_y)
                 temp_rockets.append(new_rocket)
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
+                if paused:
+                    paused = False
+                    Config.TIMESTEP = 0
+                else:
+                    paused = True
+                    Config.TIMESTEP = 3600*24
 
         for planet in planets:
             planet.update_position(planets)
