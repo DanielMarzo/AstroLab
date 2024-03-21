@@ -1,5 +1,6 @@
 import pygame
 import math
+import sys
 from src.UI import Slider
 
 pygame.init()
@@ -92,6 +93,46 @@ class Planet:
         self.orbit.append((self.x, self.y))
 
 
+def main_menu():
+    font = pygame.font.SysFont("comicsans", 60)
+    running = True
+    while running:
+        WIN.fill((0, 0, 0))  # Black background or choose another color
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Main Menu Text
+        text = font.render("AstroLab", True, (255, 255, 255))
+        WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, 150))
+
+        # Start Button
+        start_btn = pygame.Rect(WIDTH // 2 - 100, 300, 200, 100)
+        pygame.draw.rect(WIN, (0, 255, 0), start_btn)  # Green start button
+
+        # Exit Button
+        exit_btn = pygame.Rect(WIDTH // 2 - 100, 400, 200, 100)
+        pygame.draw.rect(WIN, (255, 0, 0), exit_btn)  # Red exit button
+
+        # Button Texts
+        start_text = font.render("Start", True, (255, 255, 255))
+        WIN.blit(start_text, (start_btn.x + (start_btn.width - start_text.get_width()) // 2, start_btn.y + 5))
+        exit_text = font.render("Exit", True, (255, 255, 255))
+        WIN.blit(exit_text, (exit_btn.x + (exit_btn.width - exit_text.get_width()) // 2, exit_btn.y + 5))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.quit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_btn.collidepoint(mouse_pos):
+                    main()  # Start the game
+                elif exit_btn.collidepoint(mouse_pos):
+                    pygame.quit()
+                    sys.exit()
+
+        pygame.display.update()
+
+
 def main():
     global SCALE  # Make SCALE modifiable globally
     running = True
@@ -136,10 +177,14 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                pygame.quit()
+                sys.exit()
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:  # Only access event.key here
                     running = False
+                    pygame.quit()
+                    sys.exit()
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # Zoom in
@@ -166,4 +211,5 @@ def main():
 
     pygame.quit()
 
-main()
+if __name__ == "__main__":
+    main_menu()
