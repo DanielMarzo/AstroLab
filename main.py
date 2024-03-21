@@ -1,5 +1,6 @@
 import pygame
 import math
+from src.UI import Slider
 
 pygame.init()
 
@@ -10,9 +11,10 @@ pygame.display.set_caption("AstraLab")
 AU = 149.6e6 * 1000
 G = 6.67428e-11
 
+slider = Slider(20, 100, 500, 30, 1, 24)
+
 SCALE = 100 / AU  # 100 / AU is 1AU = 100 pixels. Adjust the scale if needed
-TIMESTEP = 3600 * 24  # 3600 * 24 = 1 day per frame. Adjust the timestep to slow down the simulation
-=======
+TIMESTEP = 3600 * slider.val  # 3600 * 24 = 1 day per frame. Adjust the timestep to slow down the simulation
 SCALE = 100 / AU  # 100 pixels per AU. Adjust the scale if needed
 TIMESTEP = 3600 * 24  # One day per frame. Adjust the timestep to slow down the simulation
 
@@ -28,6 +30,8 @@ font = pygame.font.SysFont("comicsans", 30)
 
 # New variables for zoom control
 zoom_factor = 0.05  # How much each scroll zooms in or out
+
+#Slider object
 
 
 class Planet:
@@ -125,7 +129,6 @@ def main():
     planets = [sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
 
     days_passed = 0
-
     while running:
         clock.tick(60)
         WIN.fill((0, 0, 0))
@@ -133,6 +136,10 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:  # Only access event.key here
+                    running = False
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # Zoom in
@@ -142,11 +149,15 @@ def main():
                 elif event.button == 5:
                     SCALE /= (1 + zoom_factor)
 
+            slider.handle_event(event)
+
 
         for planet in planets:
             planet.update_position(planets)
             planet.draw(WIN)
 
+        slider.draw(WIN)
+        TIMESTEP = 3600 * slider.val
         days_passed += TIMESTEP / (3600 * 24)
         days_text = font.render(f"Days passed: {int(days_passed)} Days", True, (255, 255, 255))
         WIN.blit(days_text, (10, 10))
