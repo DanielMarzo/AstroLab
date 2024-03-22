@@ -121,7 +121,7 @@ def main():
     days_passed = 0
     ofx, ofy = 0, 0
     currx, curry = pygame.mouse.get_pos()
-    paused = False
+
     while running:
         clock.tick(60)
         WIN.fill((0, 0, 0))
@@ -138,7 +138,7 @@ def main():
                 curry = pygame.mouse.get_pos()[1] - ofy
                 # Zoom in
                 if event.button == 4:
-                    if(Config.get_scale() <= ((100/Config.AU)*10)):
+                    if (Config.get_scale() <= ((100 / Config.AU) * 10)):
                         Config.set_scale(Config.get_scale() * (1 + Config.get_zoom_factor()))
                         ofx *= (1 + Config.get_zoom_factor())
                         ofy *= (1 + Config.get_zoom_factor())
@@ -188,6 +188,8 @@ def main():
         days_passed += Config.get_timestep() / (3600 * 24)
         days_text = font.render(f"Days passed: {int(days_passed)} Days", True, (255, 255, 255))
         WIN.blit(days_text, (10, 10))
+        zoom_text = font.render(f"Zoom Factor: {round(Config.get_scale()/(100/Config.AU),4)} x", True, (255, 255, 255))
+        WIN.blit(zoom_text, (750, 10))
         slider.draw(WIN)
 
         pygame.display.update()
