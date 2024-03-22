@@ -1,9 +1,11 @@
 import pygame
 import math
 import rocket
+import sys
 from config import Config
 from planet import Planet
 from moon import Moon
+from UI import Slider
 
 pygame.init()
 
@@ -11,6 +13,7 @@ WIDTH, HEIGHT = Config.WIDTH, Config.HEIGHT
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AstroLab")
 
+slider = Slider(20, 100, 500, 30, 1, 24)
 # constant
 Config.G = 6.67428e-11
 AU = 149.6e6 * 1000
@@ -37,6 +40,46 @@ font = pygame.font.SysFont("comicsans", 30)
 
 # New variables for zoom control
 zoom_factor = 0.05  # How much each scroll zooms in or out
+
+def main_menu():
+    font = pygame.font.SysFont("comicsans", 60)
+    running = True
+    while running:
+        WIN.fill((0, 0, 0))  # Black background or choose another color
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Main Menu Text
+        text = font.render("AstroLab", True, (255, 255, 255))
+        WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, 150))
+
+        # Start Button
+        start_btn = pygame.Rect(WIDTH // 2 - 100, 300, 200, 100)
+        pygame.draw.rect(WIN, (0, 255, 0), start_btn)  # Green start button
+
+        # Exit Button
+        exit_btn = pygame.Rect(WIDTH // 2 - 100, 400, 200, 100)
+        pygame.draw.rect(WIN, (255, 0, 0), exit_btn)  # Red exit button
+
+        # Button Texts
+        start_text = font.render("Start", True, (255, 255, 255))
+        WIN.blit(start_text, (start_btn.x + (start_btn.width - start_text.get_width()) // 2, start_btn.y + 5))
+        exit_text = font.render("Exit", True, (255, 255, 255))
+        WIN.blit(exit_text, (exit_btn.x + (exit_btn.width - exit_text.get_width()) // 2, exit_btn.y + 5))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_btn.collidepoint(mouse_pos):
+                    main()  # Start the game
+                elif exit_btn.collidepoint(mouse_pos):
+                    pygame.quit()
+                    sys.exit()
+
+        pygame.display.update()
 
 
 def main():
@@ -84,8 +127,11 @@ def main():
         WIN.fill((0, 0, 0))
 
         for event in pygame.event.get():
+            keys = pygame.key.get_pressed()
             if event.type == pygame.QUIT:
                 running = False
+                pygame.quit()
+                sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 currx = pygame.mouse.get_pos()[0] - ofx
@@ -97,13 +143,18 @@ def main():
                         ofx *= (1 + Config.get_zoom_factor())
                         ofy *= (1 + Config.get_zoom_factor())
 
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:  # Only access event.key here
+                        running = False
+                        pygame.quit()
+                        sys.exit()
                 # Zoom out
                 if event.button == 5:
                     if(Config.get_scale() >= ((100/Config.AU)*.1)):
                         Config.set_scale(Config.get_scale() / (1 + Config.get_zoom_factor()))
                         ofx /= (1 + Config.get_zoom_factor())
                         ofy /= (1 + Config.get_zoom_factor())
-            if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
+            if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0] and not keys[pygame.K_LSHIFT]:
                 ofx = pygame.mouse.get_pos()[0] - currx
                 ofy = pygame.mouse.get_pos()[1] - curry
 
@@ -119,7 +170,9 @@ def main():
                     Config.TIMESTEP = 0
                 else:
                     paused = True
-                    Config.TIMESTEP = 3600*24
+                    Config.TIMESTEP = 3600 * 24
+
+            slider.handle_event(event)
 
         for planet in planets:
             planet.update_position(planets)
@@ -135,10 +188,11 @@ def main():
         days_passed += Config.get_timestep() / (3600 * 24)
         days_text = font.render(f"Days passed: {int(days_passed)} Days", True, (255, 255, 255))
         WIN.blit(days_text, (10, 10))
+        slider.draw(WIN)
 
         pygame.display.update()
 
     pygame.quit()
 
 
-main()
+main_menu()
