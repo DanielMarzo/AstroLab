@@ -156,7 +156,16 @@ def main():
                         ofy /= (1 + Config.get_zoom_factor())
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0] and not keys[pygame.K_LSHIFT]:
                 ofx = pygame.mouse.get_pos()[0] - currx
+                if ofx > Config.WIDTH*.85:
+                    ofx = Config.WIDTH*.85
+                if ofx < -1*Config.WIDTH*.85:
+                    ofx = -1*Config.WIDTH*.85
+
                 ofy = pygame.mouse.get_pos()[1] - curry
+                if ofy > Config.HEIGHT*.85:
+                    ofy = Config.HEIGHT*.85
+                if ofy < -1*Config.HEIGHT*.85:
+                    ofy = -1*Config.HEIGHT*.85
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
