@@ -33,6 +33,8 @@ c_saturn = (204, 204, 102)
 c_uranus = (173, 216, 230)
 c_neptune = (65, 105, 225)
 c_moon = (145, 163, 176)
+GREY = (100, 100, 100)
+WHITE = (255, 255, 255)
 
 # font
 pygame.font.init()
@@ -40,6 +42,23 @@ font = pygame.font.SysFont("comicsans", 30)
 
 # New variables for zoom control
 zoom_factor = 0.05  # How much each scroll zooms in or out
+
+background_image = pygame.image.load('../assets/data/background.jpeg').convert()
+background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
+
+
+def pause():
+    if not Config.isPaused:  # Pause only if the game is currently running
+        Config.isPaused = True
+        Config.pausedTime = Config.TIMESTEP  # Save the current timestep
+        Config.set_timestep(0)  # Stop the timestep progression
+
+
+def resume():
+    if Config.isPaused:  # Resume only if the game is currently paused
+        Config.isPaused = False
+        Config.set_timestep(Config.pausedTime)  # Restore the original timestep
+
 
 def main_menu():
     font = pygame.font.SysFont("comicsans", 60)
@@ -82,8 +101,20 @@ def main_menu():
         pygame.display.update()
 
 
+def draw_arrow(screen, start_pos, end_pos):
+    dx, dy = end_pos[0] - start_pos[0], end_pos[1] - start_pos[1]
+    norm = math.hypot(dx, dy)
+    if norm == 0:
+        return
+    dx, dy = dx / norm, dy / norm
+    dx, dy = dx * 100, dy * 100
+    line_end_pos = start_pos[0] + dx, start_pos[1] + dy
+    pygame.draw.line(screen, WHITE, start_pos, line_end_pos, 5)
+
+
 def main():
     running = True
+
     clock = pygame.time.Clock()
 
     temp_rockets = []
@@ -122,12 +153,15 @@ def main():
     ofx, ofy = 0, 0
     currx, curry = pygame.mouse.get_pos()
 
+    arrow_start_pos = 0, 0
+
     while running:
         clock.tick(60)
         WIN.fill((0, 0, 0))
-
+        WIN.blit(background_image, (0, 0))
         for event in pygame.event.get():
             keys = pygame.key.get_pressed()
+
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
@@ -150,36 +184,49 @@ def main():
                         sys.exit()
                 # Zoom out
                 if event.button == 5:
-                    if(Config.get_scale() >= ((100/Config.AU)*.1)):
+                    if (Config.get_scale() >= ((100 / Config.AU) * .1)):
                         Config.set_scale(Config.get_scale() / (1 + Config.get_zoom_factor()))
                         ofx /= (1 + Config.get_zoom_factor())
                         ofy /= (1 + Config.get_zoom_factor())
             if event.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0] and not keys[pygame.K_LSHIFT]:
                 ofx = pygame.mouse.get_pos()[0] - currx
-                if ofx > Config.WIDTH*.85:
-                    ofx = Config.WIDTH*.85
-                if ofx < -1*Config.WIDTH*.85:
-                    ofx = -1*Config.WIDTH*.85
+                if ofx > Config.WIDTH * .85:
+                    ofx = Config.WIDTH * .85
+                if ofx < -1 * Config.WIDTH * .85:
+                    ofx = -1 * Config.WIDTH * .85
 
                 ofy = pygame.mouse.get_pos()[1] - curry
-                if ofy > Config.HEIGHT*.85:
-                    ofy = Config.HEIGHT*.85
-                if ofy < -1*Config.HEIGHT*.85:
-                    ofy = -1*Config.HEIGHT*.85
+                if ofy > Config.HEIGHT * .85:
+                    ofy = Config.HEIGHT * .85
+                if ofy < -1 * Config.HEIGHT * .85:
+                    ofy = -1 * Config.HEIGHT * .85
 
+
+            earth_pos_x_pixel = (earth.x * Config.get_scale()) + WIDTH / 2 + ofx
+            earth_pos_y_pixel = (earth.y * Config.get_scale()) + HEIGHT / 2 + ofy
+            arrow_start_pos = (earth_pos_x_pixel, earth_pos_y_pixel)
+            # Right click to enter aiming mode
+            # Right click again to cancel
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                scale_x = (mouse_x - Config.WIDTH / 2 - ofx) / Config.get_scale()
-                scale_y = (mouse_y - Config.HEIGHT / 2 - ofy) / Config.get_scale()
-                new_rocket = rocket.Rocket.create_rocket(scale_x, scale_y)
-                temp_rockets.append(new_rocket)
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
-                if paused:
-                    paused = False
-                    Config.TIMESTEP = 0
+                if not Config.aiming_mode:
+                    Config.aiming_mode = True
                 else:
-                    paused = True
-                    Config.TIMESTEP = 3600 * 24
+                    Config.aiming_mode = False
+                # the game will pause while aiming
+                if Config.isPaused:
+                    resume()
+                else:
+                    pause()
+            # Space bar to launch if in aiming mode
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and Config.aiming_mode:
+                    mouse_x, mouse_y = pygame.mouse.get_pos()
+                    scale_x = (mouse_x - Config.WIDTH / 2 - ofx) / Config.get_scale()
+                    scale_y = (mouse_y - Config.HEIGHT / 2 - ofy) / Config.get_scale()
+                    new_rocket = rocket.Rocket.create_rocket(earth.x, earth.y, scale_x, scale_y)
+                    temp_rockets.append(new_rocket)
+                    Config.aiming_mode = False
+                    resume()
 
             slider.handle_event(event)
 
@@ -190,16 +237,30 @@ def main():
         moon.update_position(None)
         moon.draw(WIN, ofx, ofy)
 
-        for temp_rocket in temp_rockets:
+        x_acceleration = 500
+        y_acceleration = 500
+        for temp_rocket in temp_rockets[:]:
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                temp_rocket.x_velocity -= x_acceleration
+            if keys[pygame.K_RIGHT]:
+                temp_rocket.x_velocity += x_acceleration
+            if keys[pygame.K_UP]:
+                temp_rocket.y_velocity -= y_acceleration
+            if keys[pygame.K_DOWN]:
+                temp_rocket.y_velocity += y_acceleration
             temp_rocket.update_position(planets)
             temp_rocket.draw(WIN, ofx, ofy)
 
         days_passed += Config.get_timestep() / (3600 * 24)
         days_text = font.render(f"Days passed: {int(days_passed)} Days", True, (255, 255, 255))
         WIN.blit(days_text, (10, 10))
-        zoom_text = font.render(f"Zoom Factor: {round(Config.get_scale()/(100/Config.AU),4)} x", True, (255, 255, 255))
+        zoom_text = font.render(f"Zoom Factor: {round(Config.get_scale() / (100 / Config.AU), 4)} x", True,
+                                (255, 255, 255))
         WIN.blit(zoom_text, (750, 10))
         slider.draw(WIN)
+        if Config.aiming_mode:
+            draw_arrow(WIN, arrow_start_pos, pygame.mouse.get_pos())
 
         pygame.display.update()
 
