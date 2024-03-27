@@ -10,6 +10,10 @@ class Config:
     SCALE = 100 / AU  # 100 / AU is 1AU = 100 pixels. Adjust the scale if needed
     TIMESTEP = 3600 * 24  # 3600 * 24 = 1 day per frame. Adjust the timestep to slow down the simulation
     zoom_factor = 0.05  # How much each scroll zooms in or out
+    isPaused = False
+    pausedTime = 0  # store the timestep when pause
+    aiming_mode = False
+    activate_rocket = False
 
     @classmethod
     def get_scale(cls):

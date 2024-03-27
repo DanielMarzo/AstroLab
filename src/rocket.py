@@ -4,7 +4,7 @@ from config import Config
 
 
 class Rocket:
-    def __init__(self, x, y):
+    def __init__(self, x, y, vx=0, vy=0):
         # Data based on Saturn V, the most powerful rocket.
         # mass = 2822000 kg
         # Second Cosmic Velocity = 11.2 km/s = 11200 m/s
@@ -13,25 +13,31 @@ class Rocket:
         self.mass = 2822000
         self.x = x
         self.y = y
-        self.x_velocity = 0
-        self.y_velocity = 0
+        self.x_velocity = vx
+        self.y_velocity = vy
+        self.radius = 5
 
     @staticmethod
-    def create_rocket(x, y):
-        return Rocket(x, y)
-
+    def create_rocket(start_x, start_y, target_x, target_y, speed=112000):
+        dx, dy = target_x - start_x, target_y - start_y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        if distance == 0:
+            distance = 1
+        dx, dy = dx / distance, dy / distance
+        vx, vy = dx * speed, dy * speed
+        return Rocket(start_x, start_y, vx, vy)
 
     def draw(self, win, ofx, ofy):
         x_screen = self.x * Config.get_scale() + Config.WIDTH / 2 + ofx
         y_screen = self.y * Config.get_scale() + Config.HEIGHT / 2 + ofy
-        pygame.draw.circle(win, (255, 0, 0), (int(x_screen), int(y_screen)), 5)
+        pygame.draw.circle(win, (255, 0, 0), (int(x_screen), int(y_screen)), self.radius)
 
     def attraction(self, other):
         distance_x = other.x - self.x
         distance_y = other.y - self.y
-        distance = math.sqrt(distance_x**2 + distance_y**2)
+        distance = math.sqrt(distance_x ** 2 + distance_y ** 2)
 
-        force = Config.G * self.mass * other.mass / distance**2
+        force = Config.G * self.mass * other.mass / distance ** 2
 
         theta = math.atan2(distance_y, distance_x)
         force_x = math.cos(theta) * force
@@ -51,10 +57,4 @@ class Rocket:
 
         self.x += self.x_velocity * Config.get_timestep()
         self.y += self.y_velocity * Config.get_timestep()
-
-    def destroyed(self, x, y):
-        if self.x > Config.WIDTH or self.y > Config.HEIGHT:
-            return True
-
-
 

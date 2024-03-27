@@ -1,8 +1,10 @@
 import pygame
 from config import Config
+
 # Colors
 GRAY = (200, 200, 200)
 BLUE = (0, 120, 255)
+
 
 class Slider:
     def __init__(self, x, y, w, h, min_val, max_val):
@@ -12,7 +14,7 @@ class Slider:
         self.max_val = max_val
         self.val = max_val  # Current value
         self.dragging = False
-        Config.TIMESTEP = 3600* self.max_val
+        Config.TIMESTEP = 3600 * self.max_val
 
     def draw(self, screen):
         pygame.draw.rect(screen, GRAY, self.rect)
@@ -26,5 +28,6 @@ class Slider:
             self.dragging = False
         elif event.type == pygame.MOUSEMOTION and self.dragging:
             self.handle_rect.x = max(self.rect.x, min(event.pos[0], self.rect.right - self.handle_rect.width))
-            self.val = ((self.handle_rect.x - self.rect.x) / (self.rect.width - self.handle_rect.width)) * (self.max_val - self.min_val) + self.min_val
-            Config.TIMESTEP = 3600* self.val
+            self.val = ((self.handle_rect.x - self.rect.x) / (self.rect.width - self.handle_rect.width)) * (
+                        self.max_val - self.min_val) + self.min_val
+            Config.TIMESTEP = 3600 * self.val
