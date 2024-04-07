@@ -48,6 +48,12 @@ class Planet:
         force_y = math.sin(theta) * force
         return force_x, force_y
 
+    def isTouching(self, _x, _y):
+        if math.sqrt((_x-self.x)**2 + (_y-self.y)**2) < self.radius:
+            print("HIT")
+            return True
+        return False
+
     def update_position(self, planets):
         if not self.sun:
             total_fx = total_fy = 0

@@ -159,6 +159,8 @@ def main():
         clock.tick(60)
         WIN.fill((0, 0, 0))
         WIN.blit(background_image, (0, 0))
+
+
         for event in pygame.event.get():
             keys = pygame.key.get_pressed()
 
@@ -200,6 +202,8 @@ def main():
                     ofy = Config.HEIGHT * .85
                 if ofy < -1 * Config.HEIGHT * .85:
                     ofy = -1 * Config.HEIGHT * .85
+
+
 
 
             earth_pos_x_pixel = (earth.x * Config.get_scale()) + WIDTH / 2 + ofx

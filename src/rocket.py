@@ -1,5 +1,6 @@
 import pygame
 import math
+import planet
 from config import Config
 
 
@@ -9,7 +10,7 @@ class Rocket:
         # mass = 2822000 kg
         # Second Cosmic Velocity = 11.2 km/s = 11200 m/s
         # This is the speed for rocket escape from the earth and fly to other planets
-
+        self.still_moving = True
         self.mass = 2822000
         self.x = x
         self.y = y
@@ -46,15 +47,32 @@ class Rocket:
         return force_x, force_y
 
     def update_position(self, planets):
-        total_fx = total_fy = 0
-        for planet in planets:
-            fx, fy = self.attraction(planet)
-            total_fx += fx
-            total_fy += fy
+        if self.still_moving:
+            total_fx = total_fy = 0
+            for p in planets:
+                fx, fy = self.attraction(p)
+                total_fx += fx
+                total_fy += fy
+                if self.isTouching(p.x, p.y):
+                    if p.radius != 16:
+                        self.still_moving = False
+                        break
 
-        self.x_velocity += total_fx / self.mass * Config.get_timestep()
-        self.y_velocity += total_fy / self.mass * Config.get_timestep()
 
-        self.x += self.x_velocity * Config.get_timestep()
-        self.y += self.y_velocity * Config.get_timestep()
+        if self.still_moving:
+            self.x_velocity += total_fx / self.mass * Config.get_timestep()
+            self.y_velocity += total_fy / self.mass * Config.get_timestep()
+
+            self.x += self.x_velocity * Config.get_timestep()
+            self.y += self.y_velocity * Config.get_timestep()
+
+        else:
+            self.x_velocity = 0
+            self.y_velocity = 0
+
+    def isTouching(self, _x, _y):
+        if math.sqrt((_x - self.x) ** 2 + (_y - self.y) ** 2) < self.radius/Config.get_scale():
+            print("HIT")
+            return True
+        return False
 
