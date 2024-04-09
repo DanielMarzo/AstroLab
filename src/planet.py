@@ -7,7 +7,8 @@ class Planet:
     def __init__(self, x, y, radius, color, mass):
         self.x = x
         self.y = y
-        self.radius = radius * Config.get_scale() * Config.AU / 200
+        self.radius = radius
+        self.adj_radius = radius
         self.color = color
         self.mass = mass
         self.orbit = []
@@ -19,7 +20,7 @@ class Planet:
     def draw(self, win, ofx, ofy):
         x = self.x * Config.get_scale() + Config.WIDTH / 2
         y = self.y * Config.get_scale() + Config.HEIGHT / 2
-
+        adj_radius = self.radius * Config.get_scale() * Config.AU / 200
         if len(self.orbit) > 20:
             self.orbit.pop(0)
             self.orbit.pop(0)
@@ -30,7 +31,7 @@ class Planet:
                               self.orbit]
             pygame.draw.lines(win, (201, 201, 201), False, updated_points, 1)
 
-        pygame.draw.circle(win, self.color, (int(x) + ofx, int(y) + ofy), self.radius)
+        pygame.draw.circle(win, self.color, (int(x) + ofx, int(y) + ofy), adj_radius)
 
     def attraction(self, other):
         other_x, other_y = other.x, other.y

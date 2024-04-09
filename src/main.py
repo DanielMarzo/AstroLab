@@ -212,7 +212,7 @@ def main():
             # Right click to enter aiming mode
             # Right click again to cancel
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                if not Config.aiming_mode:
+                if not Config.aiming_mode and len(temp_rockets) == 0:
                     Config.aiming_mode = True
                 else:
                     Config.aiming_mode = False
@@ -220,10 +220,11 @@ def main():
                 if Config.isPaused:
                     resume()
                 else:
-                    pause()
+                    if Config.aiming_mode:
+                        pause()
             # Space bar to launch if in aiming mode
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and Config.aiming_mode:
+                if event.key == pygame.K_SPACE and Config.aiming_mode :
                     mouse_x, mouse_y = pygame.mouse.get_pos()
                     scale_x = (mouse_x - Config.WIDTH / 2 - ofx) / Config.get_scale()
                     scale_y = (mouse_y - Config.HEIGHT / 2 - ofy) / Config.get_scale()
@@ -231,6 +232,10 @@ def main():
                     temp_rockets.append(new_rocket)
                     Config.aiming_mode = False
                     resume()
+                if event.key == pygame.K_DELETE and len(temp_rockets) !=0:
+                    temp = temp_rockets[0]
+                    temp_rockets.remove(temp)
+                    del temp
 
             slider.handle_event(event)
 
