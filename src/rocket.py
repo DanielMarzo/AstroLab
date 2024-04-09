@@ -55,8 +55,8 @@ class Rocket:
                 fx, fy = self.attraction(p)
                 total_fx += fx
                 total_fy += fy
-                if self.isTouching(p.x, p.y):
-                    if p.radius != 16* Config.get_scale() * Config.AU / 200:
+                if self.isTouching(p.x, p.y,p):
+                    if p.radius != 16:
                         self.touching = p
                         self.still_moving = False
                         break
@@ -71,8 +71,9 @@ class Rocket:
             self.x = self.touching.x
             self.y = self.touching.y
 
-    def isTouching(self, _x, _y):
-        if math.sqrt((_x - self.x) ** 2 + (_y - self.y) ** 2) < self.radius/Config.get_scale():
+    def isTouching(self, _x, _y, planet):
+
+        if math.sqrt((_x - self.x) ** 2 + (_y - self.y) ** 2) < planet.adj_radius*Config.AU/180:
             return True
         return False
 
