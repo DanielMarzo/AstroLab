@@ -1,5 +1,6 @@
 import pygame
 import math
+import planet
 from config import Config
 
 
@@ -9,13 +10,15 @@ class Rocket:
         # mass = 2822000 kg
         # Second Cosmic Velocity = 11.2 km/s = 11200 m/s
         # This is the speed for rocket escape from the earth and fly to other planets
-
+        self.still_moving = True
         self.mass = 2822000
         self.x = x
         self.y = y
         self.x_velocity = vx
         self.y_velocity = vy
         self.radius = 5
+        self.touching = None
+        self.color = (255, 0, 0)
 
     @staticmethod
     def create_rocket(start_x, start_y, target_x, target_y, speed=112000):
@@ -30,7 +33,7 @@ class Rocket:
     def draw(self, win, ofx, ofy):
         x_screen = self.x * Config.get_scale() + Config.WIDTH / 2 + ofx
         y_screen = self.y * Config.get_scale() + Config.HEIGHT / 2 + ofy
-        pygame.draw.circle(win, (255, 0, 0), (int(x_screen), int(y_screen)), self.radius)
+        pygame.draw.circle(win, self.color, (int(x_screen), int(y_screen)), self.radius)
 
     def attraction(self, other):
         distance_x = other.x - self.x
@@ -46,15 +49,30 @@ class Rocket:
         return force_x, force_y
 
     def update_position(self, planets):
-        total_fx = total_fy = 0
-        for planet in planets:
-            fx, fy = self.attraction(planet)
-            total_fx += fx
-            total_fy += fy
+        if self.still_moving:
+            total_fx = total_fy = 0
+            for p in planets:
+                fx, fy = self.attraction(p)
+                total_fx += fx
+                total_fy += fy
+                if self.isTouching(p.x, p.y):
+                    if p.radius != 16* Config.get_scale() * Config.AU / 200:
+                        self.touching = p
+                        self.still_moving = False
+                        break
+        if self.still_moving:
+            self.x_velocity += total_fx / self.mass * Config.get_timestep()
+            self.y_velocity += total_fy / self.mass * Config.get_timestep()
 
-        self.x_velocity += total_fx / self.mass * Config.get_timestep()
-        self.y_velocity += total_fy / self.mass * Config.get_timestep()
+            self.x += self.x_velocity * Config.get_timestep()
+            self.y += self.y_velocity * Config.get_timestep()
 
-        self.x += self.x_velocity * Config.get_timestep()
-        self.y += self.y_velocity * Config.get_timestep()
+        else:
+            self.x = self.touching.x
+            self.y = self.touching.y
+
+    def isTouching(self, _x, _y):
+        if math.sqrt((_x - self.x) ** 2 + (_y - self.y) ** 2) < self.radius/Config.get_scale():
+            return True
+        return False
 
