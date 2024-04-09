@@ -17,6 +17,8 @@ class Rocket:
         self.x_velocity = vx
         self.y_velocity = vy
         self.radius = 5
+        self.touching = None
+        self.color = (255, 0, 0)
 
     @staticmethod
     def create_rocket(start_x, start_y, target_x, target_y, speed=112000):
@@ -31,7 +33,7 @@ class Rocket:
     def draw(self, win, ofx, ofy):
         x_screen = self.x * Config.get_scale() + Config.WIDTH / 2 + ofx
         y_screen = self.y * Config.get_scale() + Config.HEIGHT / 2 + ofy
-        pygame.draw.circle(win, (255, 0, 0), (int(x_screen), int(y_screen)), self.radius)
+        pygame.draw.circle(win, self.color, (int(x_screen), int(y_screen)), self.radius)
 
     def attraction(self, other):
         distance_x = other.x - self.x
@@ -54,11 +56,10 @@ class Rocket:
                 total_fx += fx
                 total_fy += fy
                 if self.isTouching(p.x, p.y):
-                    if p.radius != 16:
+                    if p.radius != 16* Config.get_scale() * Config.AU / 200:
+                        self.touching = p
                         self.still_moving = False
                         break
-
-
         if self.still_moving:
             self.x_velocity += total_fx / self.mass * Config.get_timestep()
             self.y_velocity += total_fy / self.mass * Config.get_timestep()
@@ -67,12 +68,11 @@ class Rocket:
             self.y += self.y_velocity * Config.get_timestep()
 
         else:
-            self.x_velocity = 0
-            self.y_velocity = 0
+            self.x = self.touching.x
+            self.y = self.touching.y
 
     def isTouching(self, _x, _y):
         if math.sqrt((_x - self.x) ** 2 + (_y - self.y) ** 2) < self.radius/Config.get_scale():
-            print("HIT")
             return True
         return False
 

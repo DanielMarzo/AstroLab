@@ -244,17 +244,22 @@ def main():
         x_acceleration = 500
         y_acceleration = 500
         for temp_rocket in temp_rockets[:]:
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_LEFT]:
-                temp_rocket.x_velocity -= x_acceleration
-            if keys[pygame.K_RIGHT]:
-                temp_rocket.x_velocity += x_acceleration
-            if keys[pygame.K_UP]:
-                temp_rocket.y_velocity -= y_acceleration
-            if keys[pygame.K_DOWN]:
-                temp_rocket.y_velocity += y_acceleration
-            temp_rocket.update_position(planets)
-            temp_rocket.draw(WIN, ofx, ofy)
+            if temp_rocket:
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_LEFT]:
+                    temp_rocket.x_velocity -= x_acceleration
+                if keys[pygame.K_RIGHT]:
+                    temp_rocket.x_velocity += x_acceleration
+                if keys[pygame.K_UP]:
+                    temp_rocket.y_velocity -= y_acceleration
+                if keys[pygame.K_DOWN]:
+                    temp_rocket.y_velocity += y_acceleration
+                temp_rocket.update_position(planets)
+                if not temp_rocket.still_moving:
+                    temp_rockets.remove(temp_rocket)
+                    del temp_rocket
+                else:
+                    temp_rocket.draw(WIN, ofx, ofy)
 
         days_passed += Config.get_timestep() / (3600 * 24)
         days_text = font.render(f"Days passed: {int(days_passed)} Days", True, (255, 255, 255))
