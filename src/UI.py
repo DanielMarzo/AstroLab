@@ -16,12 +16,17 @@ class Slider:
         self.dragging = False
         Config.TIMESTEP = 3600 * self.max_val
 
+        position_ratio = (self.max_val - self.min_val) / (self.max_val - self.min_val)
+        new_handle_x = self.rect.x + position_ratio * (self.rect.width - self.handle_rect.width)
+        self.handle_rect.x = new_handle_x
+
     def draw(self, screen):
         pygame.draw.rect(screen, GRAY, self.rect)
         pygame.draw.rect(screen, BLUE, self.handle_rect)
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        keys = pygame.key.get_pressed()
+        if event.type == pygame.MOUSEBUTTONDOWN and keys[pygame.K_LSHIFT]:
             if self.handle_rect.collidepoint(event.pos):
                 self.dragging = True
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -29,5 +34,65 @@ class Slider:
         elif event.type == pygame.MOUSEMOTION and self.dragging:
             self.handle_rect.x = max(self.rect.x, min(event.pos[0], self.rect.right - self.handle_rect.width))
             self.val = ((self.handle_rect.x - self.rect.x) / (self.rect.width - self.handle_rect.width)) * (
-                        self.max_val - self.min_val) + self.min_val
+                    self.max_val - self.min_val) + self.min_val
             Config.TIMESTEP = 3600 * self.val
+
+
+class HelpWindow:
+    def __init__(self, screen, font, position=(0, 0), size=(1080, 800), bg_color=(200, 200, 200), transparency=128):
+        self.screen = screen
+        self.font = font
+        self.position = position
+        self.size = size
+        self.bg_color = bg_color
+        self.transparency = transparency
+        self.is_visible = True
+
+        self.surface = pygame.Surface(self.size, pygame.SRCALPHA)
+
+    def toggle_visibility(self):
+        self.is_visible = not self.is_visible
+
+    def draw(self):
+        if self.is_visible:
+            self.surface.fill((*self.bg_color, self.transparency))
+
+            # h_ for help page
+            h_days = self.font.render('* A factor to indicate the days passed', True, (0, 0, 0))
+            h_factor1 = self.font.render('* A factor to indicate', True, (0, 0, 0))
+            h_factor2 = self.font.render('* the current zoom in/out', True, (0, 0, 0))
+            h_slider1 = self.font.render('* Pressing left "Shift" key and drag the bar', True, (0, 0, 0))
+            h_slider2 = self.font.render('  to control the time speed', True,
+                                         (0, 0, 0))
+            h_help_page = self.font.render('* Press "F1" key to open/close the help page', True, (0, 0, 0))
+
+            h_launch1 = self.font.render('* Right click to enter aiming mode', True, (0, 0, 0))
+            h_launch2 = self.font.render('* In the aiming mode, press "space bar" to launch', True, (0, 0, 0))
+            h_launch3 = self.font.render('* In the aiming mode, right click again to cancel the launch', True, (0, 0, 0))
+            h_delete_rocket1 = self.font.render('* Press "Delete" key to delete', True, (0, 0, 0))
+            h_delete_rocket2 = self.font.render('  the current rocket', True, (0, 0, 0))
+            h_control_rocket = self.font.render('* "W,A,S,D" to control the rocket after launch', True, (0, 0, 0))
+
+            h_dragging_window = self.font.render('* Pressing left click and drag to moving the window', True, (0, 0, 0))
+            h_zoom_in1 = self.font.render('* Use the scroll wheel', True, (0, 0, 0))
+            h_zoom_in2 = self.font.render('  to zoom in/out', True, (0, 0, 0))
+
+            self.surface.blit(h_days, (10, 50))
+            self.surface.blit(h_factor1, (700, 50))
+            self.surface.blit(h_factor2, (700, 100))
+            self.surface.blit(h_slider1, (10, 150))
+            self.surface.blit(h_slider2, (10, 200))
+            self.surface.blit(h_help_page, (10, 700))
+
+            self.surface.blit(h_launch1, (10, 300))
+            self.surface.blit(h_launch2, (10, 350))
+            self.surface.blit(h_launch3, (10, 400))
+            self.surface.blit(h_delete_rocket1, (10, 500))
+            self.surface.blit(h_delete_rocket2, (10, 550))
+            self.surface.blit(h_delete_rocket2, (10, 550))
+            self.surface.blit(h_control_rocket, (10, 650))
+            self.surface.blit(h_zoom_in1, (700, 150))
+            self.surface.blit(h_zoom_in2, (700, 200))
+            self.surface.blit(h_dragging_window, (10, 250))
+
+            self.screen.blit(self.surface, self.position)

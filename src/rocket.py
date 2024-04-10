@@ -16,12 +16,12 @@ class Rocket:
         self.y = y
         self.x_velocity = vx
         self.y_velocity = vy
-        self.radius = 5
+        self.radius = 3
         self.touching = None
         self.color = (255, 0, 0)
 
     @staticmethod
-    def create_rocket(start_x, start_y, target_x, target_y, speed=112000):
+    def create_rocket(start_x, start_y, target_x, target_y, speed=11200 * 4):
         dx, dy = target_x - start_x, target_y - start_y
         distance = math.sqrt(dx ** 2 + dy ** 2)
         if distance == 0:

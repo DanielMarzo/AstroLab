@@ -6,6 +6,7 @@ from config import Config
 from planet import Planet
 from moon import Moon
 from UI import Slider
+from UI import HelpWindow
 
 pygame.init()
 
@@ -13,7 +14,13 @@ WIDTH, HEIGHT = Config.WIDTH, Config.HEIGHT
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AstroLab")
 
+# font
+pygame.font.init()
+font = pygame.font.SysFont("comicsans", 30)
+
+# UI
 slider = Slider(20, 100, 500, 30, 1, 24)
+help_window = HelpWindow(WIN, font)
 # constant
 Config.G = 6.67428e-11
 AU = 149.6e6 * 1000
@@ -35,10 +42,6 @@ c_neptune = (65, 105, 225)
 c_moon = (145, 163, 176)
 GREY = (100, 100, 100)
 WHITE = (255, 255, 255)
-
-# font
-pygame.font.init()
-font = pygame.font.SysFont("comicsans", 30)
 
 # New variables for zoom control
 zoom_factor = 0.05  # How much each scroll zooms in or out
@@ -160,7 +163,6 @@ def main():
         WIN.fill((0, 0, 0))
         WIN.blit(background_image, (0, 0))
 
-
         for event in pygame.event.get():
             keys = pygame.key.get_pressed()
 
@@ -168,6 +170,10 @@ def main():
                 running = False
                 pygame.quit()
                 sys.exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F1:
+                    help_window.toggle_visibility()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 currx = pygame.mouse.get_pos()[0] - ofx
@@ -203,9 +209,6 @@ def main():
                 if ofy < -1 * Config.HEIGHT * .85:
                     ofy = -1 * Config.HEIGHT * .85
 
-
-
-
             earth_pos_x_pixel = (earth.x * Config.get_scale()) + WIDTH / 2 + ofx
             earth_pos_y_pixel = (earth.y * Config.get_scale()) + HEIGHT / 2 + ofy
             arrow_start_pos = (earth_pos_x_pixel, earth_pos_y_pixel)
@@ -224,7 +227,7 @@ def main():
                         pause()
             # Space bar to launch if in aiming mode
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and Config.aiming_mode :
+                if event.key == pygame.K_SPACE and Config.aiming_mode:
                     mouse_x, mouse_y = pygame.mouse.get_pos()
                     scale_x = (mouse_x - Config.WIDTH / 2 - ofx) / Config.get_scale()
                     scale_y = (mouse_y - Config.HEIGHT / 2 - ofy) / Config.get_scale()
@@ -232,7 +235,7 @@ def main():
                     temp_rockets.append(new_rocket)
                     Config.aiming_mode = False
                     resume()
-                if event.key == pygame.K_DELETE and len(temp_rockets) !=0:
+                if event.key == pygame.K_r and len(temp_rockets) != 0:
                     temp = temp_rockets[0]
                     temp_rockets.remove(temp)
                     del temp
@@ -251,13 +254,13 @@ def main():
         for temp_rocket in temp_rockets[:]:
             if temp_rocket:
                 keys = pygame.key.get_pressed()
-                if keys[pygame.K_LEFT]:
+                if keys[pygame.K_a]:
                     temp_rocket.x_velocity -= x_acceleration
-                if keys[pygame.K_RIGHT]:
+                if keys[pygame.K_d]:
                     temp_rocket.x_velocity += x_acceleration
-                if keys[pygame.K_UP]:
+                if keys[pygame.K_w]:
                     temp_rocket.y_velocity -= y_acceleration
-                if keys[pygame.K_DOWN]:
+                if keys[pygame.K_s]:
                     temp_rocket.y_velocity += y_acceleration
                 temp_rocket.update_position(planets)
                 if not temp_rocket.still_moving:
@@ -272,7 +275,11 @@ def main():
         zoom_text = font.render(f"Zoom Factor: {round(Config.get_scale() / (100 / Config.AU), 4)} x", True,
                                 (255, 255, 255))
         WIN.blit(zoom_text, (750, 10))
+        help_page_text = font.render('HELP:F1', True, (255, 255, 255))
+        if not help_window.is_visible:
+            WIN.blit(help_page_text, (10, 700))
         slider.draw(WIN)
+        help_window.draw()
         if Config.aiming_mode:
             draw_arrow(WIN, arrow_start_pos, pygame.mouse.get_pos())
 
