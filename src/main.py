@@ -15,8 +15,10 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AstroLab")
 
 # font
-pygame.font.init()
-font = pygame.font.SysFont("comicsans", 30)
+#pygame.font.init()
+#font = pygame.font.SysFont("comicsans", 30)
+font_path = '../assets/data/pixel.ttf'
+font = pygame.font.Font(font_path, 30)
 
 # UI
 slider = Slider(20, 100, 500, 30, 1, 24)
@@ -49,6 +51,8 @@ zoom_factor = 0.05  # How much each scroll zooms in or out
 background_image = pygame.image.load('../assets/data/background.jpeg').convert()
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
+main_menu_image = pygame.image.load('../assets/data/main_menu_bg.jpg').convert()
+main_menu_image = pygame.transform.scale(main_menu_image, (WIDTH, HEIGHT))
 
 def pause():
     if not Config.isPaused:  # Pause only if the game is currently running
@@ -64,23 +68,27 @@ def resume():
 
 
 def main_menu():
-    font = pygame.font.SysFont("comicsans", 60)
+    #WIN.fill((0, 0, 0))
+    WIN.blit(main_menu_image, (0, 0))
+
+    font_path = '../assets/data/pixel.ttf'
+    font = pygame.font.Font(font_path, 50)
     running = True
     while running:
-        WIN.fill((0, 0, 0))  # Black background or choose another color
+        #WIN.fill((0, 0, 0))  # Black background or choose another color
         mouse_pos = pygame.mouse.get_pos()
 
         # Main Menu Text
-        text = font.render("AstroLab", True, (255, 255, 255))
-        WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, 150))
+        # text = font.render("AstroLab", True, (255, 255, 255))
+        # WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, 150))
 
         # Start Button
-        start_btn = pygame.Rect(WIDTH // 2 - 100, 300, 200, 100)
-        pygame.draw.rect(WIN, (0, 255, 0), start_btn)  # Green start button
+        start_btn = pygame.Rect(840, 680, 200, 100)
+        pygame.draw.rect(WIN, (9, 19, 41), start_btn)  # Green start button
 
         # Exit Button
-        exit_btn = pygame.Rect(WIDTH // 2 - 100, 400, 200, 100)
-        pygame.draw.rect(WIN, (255, 0, 0), exit_btn)  # Red exit button
+        exit_btn = pygame.Rect(0, 680, 200, 100)
+        pygame.draw.rect(WIN, (9, 19, 41), exit_btn)  # Red exit button
 
         # Button Texts
         start_text = font.render("Start", True, (255, 255, 255))
