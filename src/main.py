@@ -83,16 +83,22 @@ def main_menu():
         # WIN.blit(text, (WIDTH // 2 - text.get_width() // 2, 150))
 
         # Start Button
-        start_btn = pygame.Rect(840, 680, 200, 100)
+        start_btn = pygame.Rect(850, 650, 180, 80)
         pygame.draw.rect(WIN, (9, 19, 41), start_btn)  # Green start button
 
         # Exit Button
-        exit_btn = pygame.Rect(0, 680, 200, 100)
+        exit_btn = pygame.Rect(0, 720, 200, 100)
         pygame.draw.rect(WIN, (9, 19, 41), exit_btn)  # Red exit button
+
+        #Credits Button
+        credit_btn = pygame.Rect(860, 720, 200, 100)
+        pygame.draw.rect(WIN, (9, 19, 41), credit_btn)  # Green start button
 
         # Button Texts
         start_text = font.render("Start", True, (255, 255, 255))
         WIN.blit(start_text, (start_btn.x + (start_btn.width - start_text.get_width()) // 2, start_btn.y + 5))
+        credit_text = font.render("Credits", True, (255, 255, 255))
+        WIN.blit(credit_text, (credit_btn.x + (credit_btn.width - credit_text.get_width()) // 2, credit_btn.y + 5))
         exit_text = font.render("Exit", True, (255, 255, 255))
         WIN.blit(exit_text, (exit_btn.x + (exit_btn.width - exit_text.get_width()) // 2, exit_btn.y + 5))
 
@@ -108,6 +114,10 @@ def main_menu():
                 elif exit_btn.collidepoint(mouse_pos):
                     pygame.quit()
                     sys.exit()
+                elif credit_btn.collidepoint(mouse_pos):
+                    pygame.quit()
+                    sys.exit()
+                    # insert credits function here and remove the quit code right above
 
         pygame.display.update()
 
