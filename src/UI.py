@@ -1,4 +1,6 @@
 import pygame
+import random
+import textwrap
 from config import Config
 
 # Colors
@@ -167,3 +169,52 @@ class GameMenu:
             elif self.exit_button.collidepoint(event.pos):
                 return "exit"
         return None
+
+
+class TipsPlayer:
+    def __init__(self, screen, font, tips_file):
+        self.screen = screen
+        self.font = font
+        self.timer = 20000
+        self.tips = self.load_tips(tips_file)
+        self.current_tip_index = random.randint(0, len(self.tips) - 1)
+        self.timer_event = pygame.USEREVENT + 1
+        pygame.time.set_timer(self.timer_event, self.timer)
+        self.visible = False
+
+    @staticmethod
+    def load_tips(file_path):
+        with open(file_path, 'r', encoding='utf-8') as file:
+            tips = [line.strip() for line in file if line.strip()]
+        return tips
+
+    def toggle_visibility(self):
+        self.visible = not self.visible
+
+    def get_random_tip(self):
+        indices = list(range(len(self.tips)))
+        if len(indices) > 1:
+            indices.remove(self.current_tip_index)
+        return random.choice(indices)
+
+    def is_visible(self):
+        return self.visible
+
+    def update(self, event):
+        if self.visible and event.type == self.timer_event:
+            self.current_tip_index = self.get_random_tip()
+
+    def draw(self):
+        if not self.visible:
+            return
+
+        tip_title = self.font.render("Do you know: ", True, (255, 255, 255))
+        title_rect = tip_title.get_rect(x=10, y=600)
+        self.screen.blit(tip_title, title_rect)
+
+        lines = textwrap.wrap(self.tips[self.current_tip_index], width=50)
+
+        for i, line in enumerate(lines):
+            tip_line = self.font.render(line, True, (255, 255, 255))
+            line_rect = tip_line.get_rect(x=220, y=600 + i * (self.font.get_height()))
+            self.screen.blit(tip_line, line_rect)

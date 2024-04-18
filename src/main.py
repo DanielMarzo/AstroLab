@@ -5,7 +5,7 @@ import sys
 from config import Config
 from planet import Planet
 from moon import Moon
-from UI import Slider, GameMenu, HelpWindow, Credits
+from UI import Slider, GameMenu, HelpWindow, Credits, TipsPlayer
 
 
 pygame.init()
@@ -25,6 +25,8 @@ slider = Slider(20, 100, 500, 30, 1, 24)
 help_window = HelpWindow(WIN, font)
 credits_page = Credits(WIN, font)
 in_game_menu = GameMenu(WIN, font)
+tips_player = TipsPlayer(WIN, font, '../assets/data/tips.txt')
+
 # constant
 Config.G = 6.67428e-11
 AU = 149.6e6 * 1000
@@ -187,7 +189,7 @@ def main():
 
         for event in pygame.event.get():
             keys = pygame.key.get_pressed()
-
+            tips_player.update(event)
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
@@ -309,15 +311,19 @@ def main():
         WIN.blit(days_text, (10, 10))
         zoom_text = font.render(f"Zoom Factor: {round(Config.get_scale() / (100 / Config.AU), 4)} x", True,
                                 (255, 255, 255))
-        WIN.blit(zoom_text, (750, 10))
+        WIN.blit(zoom_text, (700, 10))
         help_page_text = font.render('HELP:F1', True, (255, 255, 255))
         in_game_menu_text = font.render('Menu:ESC', True, (255, 255, 255))
         if not help_window.is_visible:
             WIN.blit(help_page_text, (10, 700))
             WIN.blit(in_game_menu_text, (10, 750))
+            tips_player.visible = True
+        elif help_window.is_visible:
+            tips_player.visible = False
         slider.draw(WIN)
         help_window.draw()
         in_game_menu.draw()
+        tips_player.draw()
         if Config.aiming_mode:
             draw_arrow(WIN, arrow_start_pos, pygame.mouse.get_pos())
 
