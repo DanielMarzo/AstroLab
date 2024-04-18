@@ -104,7 +104,6 @@ class HelpWindow:
             self.screen.blit(self.surface, self.position)
 
 
-
 class Credits:
     def __init__(self, screen, font, position=(100, 150), size=(880, 500), bg_color=(200, 200, 200), transparency=3):
         self.screen = screen
