@@ -5,8 +5,8 @@ import sys
 from config import Config
 from planet import Planet
 from moon import Moon
-from UI import Slider
-from UI import HelpWindow
+from UI import Slider, GameMenu, HelpWindow, Credits
+
 
 pygame.init()
 
@@ -15,14 +15,16 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AstroLab")
 
 # font
-#pygame.font.init()
-#font = pygame.font.SysFont("comicsans", 30)
+# pygame.font.init()
+# font = pygame.font.SysFont("comicsans", 30)
 font_path = '../assets/data/pixel.ttf'
 font = pygame.font.Font(font_path, 30)
 
 # UI
 slider = Slider(20, 100, 500, 30, 1, 24)
 help_window = HelpWindow(WIN, font)
+credits_page = Credits(WIN, font)
+in_game_menu = GameMenu(WIN, font)
 # constant
 Config.G = 6.67428e-11
 AU = 149.6e6 * 1000
@@ -54,6 +56,7 @@ background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 main_menu_image = pygame.image.load('../assets/data/main_menu_bg.jpg').convert()
 main_menu_image = pygame.transform.scale(main_menu_image, (WIDTH, HEIGHT))
 
+
 def pause():
     if not Config.isPaused:  # Pause only if the game is currently running
         Config.isPaused = True
@@ -68,14 +71,14 @@ def resume():
 
 
 def main_menu():
-    #WIN.fill((0, 0, 0))
+    # WIN.fill((0, 0, 0))
     WIN.blit(main_menu_image, (0, 0))
 
     font_path = '../assets/data/pixel.ttf'
     font = pygame.font.Font(font_path, 50)
     running = True
     while running:
-        #WIN.fill((0, 0, 0))  # Black background or choose another color
+        # WIN.fill((0, 0, 0))  # Black background or choose another color
         mouse_pos = pygame.mouse.get_pos()
 
         # Main Menu Text
@@ -86,6 +89,10 @@ def main_menu():
         start_btn = pygame.Rect(840, 680, 200, 100)
         pygame.draw.rect(WIN, (9, 19, 41), start_btn)  # Green start button
 
+        # Credits
+        credits_btn = pygame.Rect(50, 50, 200, 100)
+        pygame.draw.rect(WIN, (9, 19, 41), credits_btn)  # Green start button
+
         # Exit Button
         exit_btn = pygame.Rect(0, 680, 200, 100)
         pygame.draw.rect(WIN, (9, 19, 41), exit_btn)  # Red exit button
@@ -93,8 +100,12 @@ def main_menu():
         # Button Texts
         start_text = font.render("Start", True, (255, 255, 255))
         WIN.blit(start_text, (start_btn.x + (start_btn.width - start_text.get_width()) // 2, start_btn.y + 5))
+        credits_text = font.render("Credits", True, (255, 255, 255))
+        WIN.blit(credits_text, (credits_btn.x + (credits_btn.width - credits_text.get_width()) // 2, credits_btn.y + 5))
         exit_text = font.render("Exit", True, (255, 255, 255))
         WIN.blit(exit_text, (exit_btn.x + (exit_btn.width - exit_text.get_width()) // 2, exit_btn.y + 5))
+
+        credits_page.draw()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -105,6 +116,9 @@ def main_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if start_btn.collidepoint(mouse_pos):
                     main()  # Start the game
+                elif credits_btn.collidepoint(mouse_pos):
+                    WIN.blit(main_menu_image, (0, 0))
+                    credits_page.toggle_visibility()
                 elif exit_btn.collidepoint(mouse_pos):
                     pygame.quit()
                     sys.exit()
@@ -182,6 +196,19 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F1:
                     help_window.toggle_visibility()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    in_game_menu.toggle_visibility()
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                result = in_game_menu.handle_event(event)
+                if result == "exit":
+                    pygame.quit()
+                    sys.exit()
+                elif result == "main_menu":
+                    in_game_menu.visible = False
+                    main_menu()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 currx = pygame.mouse.get_pos()[0] - ofx
@@ -284,10 +311,13 @@ def main():
                                 (255, 255, 255))
         WIN.blit(zoom_text, (750, 10))
         help_page_text = font.render('HELP:F1', True, (255, 255, 255))
+        in_game_menu_text = font.render('Menu:ESC', True, (255, 255, 255))
         if not help_window.is_visible:
             WIN.blit(help_page_text, (10, 700))
+            WIN.blit(in_game_menu_text, (10, 750))
         slider.draw(WIN)
         help_window.draw()
+        in_game_menu.draw()
         if Config.aiming_mode:
             draw_arrow(WIN, arrow_start_pos, pygame.mouse.get_pos())
 
