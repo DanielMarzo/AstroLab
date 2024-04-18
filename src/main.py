@@ -146,35 +146,35 @@ def main():
 
     temp_rockets = []
 
-    sun = Planet(0, 0, 32, c_sun, 1.98892 * 10 ** 30)  # Sun
+    sun = Planet(0, 0, 32, c_sun, 1.98892 * 10 ** 30, "Sun")  # Sun
     sun.sun = True
 
-    mercury = Planet(0.387 * AU, 0, 8, c_mercury, 3.30 * 10 ** 23)  # Mercury
+    mercury = Planet(0.387 * AU, 0, 8, c_mercury, 3.30 * 10 ** 23, "Mercury")  # Mercury
     mercury.y_velocity = -47.4 * 1000
 
-    venus = Planet(0.723 * AU, 0, 14, c_venus, 4.8685 * 10 ** 24)  # Venus
+    venus = Planet(0.723 * AU, 0, 14, c_venus, 4.8685 * 10 ** 24, "Venus")  # Venus
     venus.y_velocity = -35.02 * 1000
 
-    earth = Planet(-1 * AU, 0, 16, c_earth, 5.9742 * 10 ** 24)  # Earth
+    earth = Planet(-1 * AU, 0, 16, c_earth, 5.9742 * 10 ** 24, "Earth")  # Earth
     earth.y_velocity = 29.783 * 1000
 
-    mars = Planet(-1.524 * AU, 0, 12, c_mars, 6.39 * 10 ** 23)  # Mars
+    mars = Planet(-1.524 * AU, 0, 12, c_mars, 6.39 * 10 ** 23, "Mars")  # Mars
     mars.y_velocity = 24.077 * 1000
 
-    jupiter = Planet(-5.204 * AU, 0, 22, c_jupiter, 1.898 * 10 ** 27)
+    jupiter = Planet(-5.204 * AU, 0, 22, c_jupiter, 1.898 * 10 ** 27, "Jupiter")
     jupiter.y_velocity = 13.06 * 1000
 
-    saturn = Planet(-9.582 * AU, 0, 24, c_saturn, 5.683 * 10 ** 26)
+    saturn = Planet(-9.582 * AU, 0, 24, c_saturn, 5.683 * 10 ** 26, "Saturn")
     saturn.y_velocity = 9.68 * 1000
 
-    uranus = Planet(-19.218 * AU, 0, 26, c_uranus, 8.681 * 10 ** 25)
+    uranus = Planet(-19.218 * AU, 0, 26, c_uranus, 8.681 * 10 ** 25, "Uranus")
     uranus.y_velocity = 6.80 * 1000
 
-    neptune = Planet(30.110 * AU, 0, 34, c_neptune, 1.024 * 10 ** 26)
+    neptune = Planet(30.110 * AU, 0, 34, c_neptune, 1.024 * 10 ** 26, "Neptune")
     neptune.y_velocity = -5.43 * 1000
 
     planets = [sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
-    moon = Moon(earth, 4, c_moon, 7.34767309 * 10 ** 22, 0.00257 * AU * 50)
+    moon = Moon(earth, 4, c_moon, 7.34767309 * 10 ** 22, 0.00257 * AU * 50, "Moon")
 
     days_passed = 0
     ofx, ofy = 0, 0
@@ -198,6 +198,11 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F1:
                     help_window.toggle_visibility()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F2:
+                    for planet in planets:
+                        planet.toggle_visibility()
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -312,10 +317,12 @@ def main():
         zoom_text = font.render(f"Zoom Factor: {round(Config.get_scale() / (100 / Config.AU), 4)} x", True,
                                 (255, 255, 255))
         WIN.blit(zoom_text, (700, 10))
-        help_page_text = font.render('HELP:F1', True, (255, 255, 255))
+        help_page_text = font.render('Help:F1', True, (255, 255, 255))
+        display_name_text = font.render('Name:F2', True, (255, 255, 255))
         in_game_menu_text = font.render('Menu:ESC', True, (255, 255, 255))
         if not help_window.is_visible:
-            WIN.blit(help_page_text, (10, 700))
+            WIN.blit(help_page_text, (10, 650))
+            WIN.blit(display_name_text, (10, 700))
             WIN.blit(in_game_menu_text, (10, 750))
             tips_player.visible = True
         elif help_window.is_visible:

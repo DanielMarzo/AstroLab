@@ -4,7 +4,8 @@ from config import Config
 
 
 class Planet:
-    def __init__(self, x, y, radius, color, mass):
+
+    def __init__(self, x, y, radius, color, mass, name):
         self.x = x
         self.y = y
         self.radius = radius
@@ -16,6 +17,12 @@ class Planet:
         self.distance_to_sun = 0
         self.x_velocity = 0
         self.y_velocity = 0
+        self.name = name
+        self.name_visible = True
+        self.font = pygame.font.Font('../assets/data/pixel.ttf', 20)
+
+    def toggle_visibility(self):
+        self.name_visible = not self.name_visible
 
     def draw(self, win, ofx, ofy):
         x = self.x * Config.get_scale() + Config.WIDTH / 2
@@ -24,6 +31,10 @@ class Planet:
         if len(self.orbit) > 20:
             self.orbit.pop(0)
             self.orbit.pop(0)
+
+        if self.name_visible and not self.sun:
+            distance_text = self.font.render(self.name, True, (255, 255, 255))
+            win.blit(distance_text, (x + ofx, y + ofy))
 
         if len(self.orbit) > 2:
             updated_points = [(point[0] * Config.get_scale() + Config.WIDTH / 2 + ofx,
@@ -48,8 +59,6 @@ class Planet:
         force_x = math.cos(theta) * force
         force_y = math.sin(theta) * force
         return force_x, force_y
-
-
 
     def update_position(self, planets):
         if not self.sun:

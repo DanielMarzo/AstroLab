@@ -80,6 +80,8 @@ class HelpWindow:
             h_zoom_in1 = self.font.render('* Use the scroll wheel', True, (0, 0, 0))
             h_zoom_in2 = self.font.render('  to zoom in/out', True, (0, 0, 0))
 
+            h_name = self.font.render('* Press "F2" key to display names', True, (0, 0, 0))
+
             self.surface.blit(h_days, (10, 50))
             self.surface.blit(h_factor1, (700, 50))
             self.surface.blit(h_factor2, (700, 100))
@@ -97,8 +99,10 @@ class HelpWindow:
             self.surface.blit(h_zoom_in1, (700, 150))
             self.surface.blit(h_zoom_in2, (700, 200))
             self.surface.blit(h_dragging_window, (10, 250))
+            self.surface.blit(h_name, (10, 750))
 
             self.screen.blit(self.surface, self.position)
+
 
 
 class Credits:
