@@ -10,6 +10,16 @@ from UI import Slider, GameMenu, HelpWindow, Credits, TipsPlayer
 
 pygame.init()
 
+pygame.mixer.init()
+pygame.mixer.music.load('../assets/sounds/Retro Dreamscape - Twin Musicom.mp3')
+pygame.mixer.music.play(-1)
+
+# Background Music:
+# Dreamscape by Twin Musicom (http://www.twinmusicom.org) is part of the YouTube Audio Library (
+# https://www.youtube.com/audiolibrary/...) and it's licensed under a Creative Commons license (
+# https://creativecommons.org/licenses/....
+# Link:https://www.youtube.com/watch?v=3_crUgcNcpg
+
 WIDTH, HEIGHT = Config.WIDTH, Config.HEIGHT
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AstroLab")
