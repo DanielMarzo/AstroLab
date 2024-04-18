@@ -5,13 +5,16 @@ from planet import Planet
 
 
 class Moon(Planet):
-    def __init__(self, host_planet, radius, color, mass, distance_from_planet):
-        super().__init__(host_planet.x, host_planet.y, radius, color, mass)
+    def __init__(self, host_planet, radius, color, mass, distance_from_planet, name):
+        super().__init__(host_planet.x, host_planet.y, radius, color, mass, name)
         self.host_planet = host_planet
         self.distance_from_planet = distance_from_planet
         self.angle = 0
         self.days_per_orbit = 27.3
         self.radians_per_day = (2 * math.pi) / self.days_per_orbit
+        self.name = name
+        self.name_visible = False
+        self.font = pygame.font.Font('../assets/data/pixel.ttf', 20)
 
     def update_position(self, _):
         self.angle += self.radians_per_day * (Config.get_timestep() / 86400)
